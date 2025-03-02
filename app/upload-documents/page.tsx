@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { uploadDocument } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-export default function UploadDocumentsPage() {
+function UploadForm() {
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [uploading, setUploading] = useState(false);
@@ -31,7 +31,6 @@ export default function UploadDocumentsPage() {
 
     setUploading(true);
 
-    // Create FormData to send file and file name
     const formData = new FormData();
     formData.append("file", file);
     formData.append("fileName", fileName);
@@ -74,5 +73,13 @@ export default function UploadDocumentsPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function UploadDocumentsPage() {
+  return (
+    <Suspense fallback={<p className="text-center">Loading...</p>}>
+      <UploadForm />
+    </Suspense>
   );
 }
