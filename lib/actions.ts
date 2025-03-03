@@ -49,16 +49,52 @@ export async function deleteMember(familyMemberId: string) {
   }
 }
 
+// export async function uploadDocument(memberId: string, formData: FormData) {
+//   try {
+//     const file = formData.get("file") as File;
+//     const fileName = formData.get("fileName") as string;
+
+//     if (!file || !fileName) {
+//       throw new Error("Missing file or file name.");
+//     }
+
+//     const googleDriveFileId = await uploadToGoogleDrive(file);
+
+//     if (!googleDriveFileId) {
+//       throw new Error("Failed to upload to Google Drive.");
+//     }
+
+//     const document = await prisma.document.create({
+//       data: {
+//         name: fileName, // Use user-provided file name
+//         googleDriveFileId,
+//         familyMemberId: memberId,
+//       },
+//     });
+
+//     return document;
+//   } catch (error) {
+//     console.error("Upload error:", error);
+//     return null;
+//   }
+// }
+
 export async function uploadDocument(memberId: string, formData: FormData) {
   try {
     const file = formData.get("file") as File;
     const fileName = formData.get("fileName") as string;
+    const familyMemberName = formData.get("familyMemberName") as string;
 
-    if (!file || !fileName) {
-      throw new Error("Missing file or file name.");
+    if (!file || !fileName || !familyMemberName) {
+      throw new Error("Missing file, file name, or family member name.");
     }
 
-    const googleDriveFileId = await uploadToGoogleDrive(file);
+    // Pass both file and familyMemberName to uploadToGoogleDrive
+    const googleDriveFileId = await uploadToGoogleDrive(
+      file,
+      fileName,
+      familyMemberName
+    );
 
     if (!googleDriveFileId) {
       throw new Error("Failed to upload to Google Drive.");
@@ -66,7 +102,7 @@ export async function uploadDocument(memberId: string, formData: FormData) {
 
     const document = await prisma.document.create({
       data: {
-        name: fileName, // Use user-provided file name
+        name: fileName,
         googleDriveFileId,
         familyMemberId: memberId,
       },

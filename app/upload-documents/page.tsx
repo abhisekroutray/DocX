@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { uploadDocument } from "@/lib/actions";
+import { uploadDocument, getFamilyMember } from "@/lib/actions"; // Fetch family member name
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,9 +11,31 @@ function UploadForm() {
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [uploading, setUploading] = useState(false);
+  const [memberId, setMemberId] = useState<string | null>(null);
+  const [familyMemberName, setFamilyMemberName] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const memberId = searchParams.get("id");
+
+  useEffect(() => {
+    const id = searchParams.get("id");
+    setMemberId(id);
+
+    if (id) {
+      // Fetch family member name
+      getFamilyMember(id)
+        .then((data) => {
+          if (data?.name) {
+            setFamilyMemberName(data.name);
+          } else {
+            setFamilyMemberName("Unknown Member");
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching member:", error);
+          setFamilyMemberName("Unknown Member");
+        });
+    }
+  }, [searchParams]);
 
   if (!memberId) {
     return (
@@ -31,18 +53,25 @@ function UploadForm() {
 
     setUploading(true);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("fileName", fileName);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("fileName", fileName);
+      formData.append("familyMemberName", familyMemberName || "Unknown");
 
-    const success = await uploadDocument(memberId, formData);
-    setUploading(false);
+      const success = await uploadDocument(memberId, formData);
+      setUploading(false);
 
-    if (success) {
-      alert("Document uploaded successfully!");
-      router.push(`/${memberId}`);
-    } else {
-      alert("Failed to upload document.");
+      if (success) {
+        alert("Document uploaded successfully!");
+        router.push(`/${memberId}`);
+      } else {
+        alert("Failed to upload document.");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      alert("An error occurred while uploading the document.");
+      setUploading(false);
     }
   };
 
@@ -51,6 +80,11 @@ function UploadForm() {
       <Card className="max-w-md mx-auto">
         <CardHeader>
           <CardTitle>Upload Document</CardTitle>
+          {familyMemberName && (
+            <p className="text-sm text-gray-500">
+              Uploading for: {familyMemberName}
+            </p>
+          )}
         </CardHeader>
         <CardContent className="space-y-4">
           <Input
