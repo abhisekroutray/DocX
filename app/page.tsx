@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { prisma } from "@/lib/prisma"; // Use singleton Prisma instance
+import { prisma } from "@/lib/prisma";
 import { UserButton } from "@clerk/nextjs";
 
 export default async function Home() {
@@ -15,6 +15,7 @@ export default async function Home() {
     // Fetch family members for the logged-in user
     const familyMembers = await prisma.familyMember.findMany({
       where: { userId },
+      select: { id: true, name: true },
     });
 
     return (

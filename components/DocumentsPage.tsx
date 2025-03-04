@@ -48,7 +48,7 @@ export default function DocumentsPage({
     <div className="p-4">
       <Card className="max-w-md mx-auto">
         <CardHeader>
-          <CardTitle>{familyMember.name}s Documents</CardTitle>
+          <CardTitle>{familyMember.name}&apos;s Documents</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <Link href="/">
