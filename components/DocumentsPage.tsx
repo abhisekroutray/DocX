@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteDocument } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Link from "next/link";
+import { Share, Trash } from "lucide-react";
+import { useState } from "react";
 
 interface Document {
   id: string;
@@ -31,7 +32,9 @@ export default function DocumentsPage({
 }: {
   familyMember: FamilyMember;
 }) {
-  const [, setSelectedDocument] = useState<Document | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(
+    null
+  );
   const router = useRouter();
 
   const handleDelete = async (documentId: string) => {
@@ -53,7 +56,7 @@ export default function DocumentsPage({
         <CardContent className="space-y-4">
           <Link href="/">
             <Button variant="outline" className="w-full mt-4">
-              Back to Family Members
+              Back to Members
             </Button>
           </Link>
 
@@ -62,51 +65,51 @@ export default function DocumentsPage({
           ) : (
             <ul className="space-y-2">
               {familyMember.documents.map((doc) => (
-                <li
-                  key={doc.id}
-                  className="flex justify-between items-center border p-2 rounded"
-                >
-                  <span>{doc.name}</span>
-                  <div className="space-x-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
+                <Dialog key={doc.id}>
+                  <DialogTrigger asChild>
+                    <li
+                      className="flex justify-between items-center border p-2 rounded cursor-pointer hover:bg-gray-100 transition"
+                      onClick={() => setSelectedDocument(doc)}
+                    >
+                      <span className="flex-1">{doc.name}</span>
+                      <div className="space-x-2 flex">
                         <Button
                           variant="outline"
-                          onClick={() => setSelectedDocument(doc)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(
+                              `https://wa.me/?text=View this document: https://drive.google.com/file/d/${doc.googleDriveFileId}`,
+                              "_blank"
+                            );
+                          }}
                         >
-                          View
+                          <Share />
                         </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>{doc.name}</DialogTitle>
-                        </DialogHeader>
-                        <iframe
-                          src={`https://drive.google.com/file/d/${doc.googleDriveFileId}/preview`}
-                          className="w-full h-[80vh]"
-                        ></iframe>
-                      </DialogContent>
-                    </Dialog>
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        window.open(
-                          `https://wa.me/?text=View this document: https://drive.google.com/file/d/${doc.googleDriveFileId}`,
-                          "_blank"
-                        )
-                      }
-                    >
-                      Share
-                    </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(doc.id);
+                          }}
+                        >
+                          <Trash />
+                        </Button>
+                      </div>
+                    </li>
+                  </DialogTrigger>
 
-                    <Button
-                      variant="destructive"
-                      onClick={() => handleDelete(doc.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </li>
+                  {selectedDocument && selectedDocument.id === doc.id && (
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{doc.name}</DialogTitle>
+                      </DialogHeader>
+                      <iframe
+                        src={`https://drive.google.com/file/d/${doc.googleDriveFileId}/preview`}
+                        className="w-full h-[80vh]"
+                      ></iframe>
+                    </DialogContent>
+                  )}
+                </Dialog>
               ))}
             </ul>
           )}
