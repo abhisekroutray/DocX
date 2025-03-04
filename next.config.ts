@@ -2,10 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true, // Helps catch rendering issues in development
-  experimental: {
-    workerThreads: true, // Enables worker threads for better performance
-    cpus: 4, // Utilizes multiple CPU cores
-  },
   async headers() {
     return [
       {
