@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma"; // Use singleton Prisma instance
+import { UserButton } from "@clerk/nextjs";
 
 export default async function Home() {
   // Get the logged-in user's ID from Clerk
@@ -20,14 +21,19 @@ export default async function Home() {
       <div className="p-4">
         <Card className="max-w-md mx-auto">
           <CardHeader>
-            <CardTitle>Family Members</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle>All Members *</CardTitle>
+              <div>
+                <UserButton />
+              </div>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Add Family Member */}
             <Link href="/add-family-member" passHref>
               <Button className="w-full">
                 <Plus className="mr-2 h-4 w-4" />
-                Add Family Member
+                Add New Member
               </Button>
             </Link>
 
