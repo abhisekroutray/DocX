@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Link from "next/link";
-import { Share, Trash } from "lucide-react";
+import { Share, Trash, Download } from "lucide-react";
 import { useState } from "react";
 
 interface Document {
@@ -47,6 +47,23 @@ export default function DocumentsPage({
     }
   };
 
+  const handleDownloadAll = () => {
+    if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+      const documentUrls = familyMember.documents.map(
+        (doc) => `https://drive.google.com/uc?id=${doc.googleDriveFileId}`
+      );
+
+      navigator.serviceWorker.controller.postMessage({
+        type: "CACHE_ALL",
+        files: documentUrls,
+      });
+
+      alert("All documents are being downloaded for offline use!");
+    } else {
+      alert("Service Worker not registered. Please reload the page.");
+    }
+  };
+
   return (
     <div className="p-4">
       <Card className="max-w-md mx-auto">
@@ -63,55 +80,65 @@ export default function DocumentsPage({
           {familyMember.documents.length === 0 ? (
             <p className="text-center text-gray-500">No documents found.</p>
           ) : (
-            <ul className="space-y-2">
-              {familyMember.documents.map((doc) => (
-                <Dialog key={doc.id}>
-                  <DialogTrigger asChild>
-                    <li
-                      className="flex justify-between items-center border p-2 rounded cursor-pointer hover:bg-gray-100 transition"
-                      onClick={() => setSelectedDocument(doc)}
-                    >
-                      <span className="flex-1">{doc.name}</span>
-                      <div className="space-x-2 flex">
-                        <Button
-                          variant="outline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(
-                              `https://wa.me/?text=View this document: https://drive.google.com/file/d/${doc.googleDriveFileId}`,
-                              "_blank"
-                            );
-                          }}
-                        >
-                          <Share />
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(doc.id);
-                          }}
-                        >
-                          <Trash />
-                        </Button>
-                      </div>
-                    </li>
-                  </DialogTrigger>
+            <>
+              <Button
+                className="w-full flex items-center gap-2"
+                onClick={handleDownloadAll}
+              >
+                <Download size={16} />
+                Download All for Offline
+              </Button>
 
-                  {selectedDocument && selectedDocument.id === doc.id && (
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>{doc.name}</DialogTitle>
-                      </DialogHeader>
-                      <iframe
-                        src={`https://drive.google.com/file/d/${doc.googleDriveFileId}/preview`}
-                        className="w-full h-[80vh]"
-                      ></iframe>
-                    </DialogContent>
-                  )}
-                </Dialog>
-              ))}
-            </ul>
+              <ul className="space-y-2">
+                {familyMember.documents.map((doc) => (
+                  <Dialog key={doc.id}>
+                    <DialogTrigger asChild>
+                      <li
+                        className="flex justify-between items-center border p-2 rounded cursor-pointer hover:bg-gray-100 transition"
+                        onClick={() => setSelectedDocument(doc)}
+                      >
+                        <span className="flex-1">{doc.name}</span>
+                        <div className="space-x-2 flex">
+                          <Button
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.open(
+                                `https://wa.me/?text=View this document: https://drive.google.com/file/d/${doc.googleDriveFileId}`,
+                                "_blank"
+                              );
+                            }}
+                          >
+                            <Share />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(doc.id);
+                            }}
+                          >
+                            <Trash />
+                          </Button>
+                        </div>
+                      </li>
+                    </DialogTrigger>
+
+                    {selectedDocument && selectedDocument.id === doc.id && (
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>{doc.name}</DialogTitle>
+                        </DialogHeader>
+                        <iframe
+                          src={`https://drive.google.com/file/d/${doc.googleDriveFileId}/preview`}
+                          className="w-full h-[80vh]"
+                        ></iframe>
+                      </DialogContent>
+                    )}
+                  </Dialog>
+                ))}
+              </ul>
+            </>
           )}
           <Button
             className="w-full"

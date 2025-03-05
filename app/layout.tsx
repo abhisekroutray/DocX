@@ -1,7 +1,10 @@
-import type { Metadata } from "next";
+"use client";
+
+import { useEffect } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { metadata } from "./metadata"; // Import metadata
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,19 +16,29 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "DocX",
-  description: "Document storage",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => registration.unregister());
+      });
+    }
+  }, []);
+
   return (
     <ClerkProvider>
       <html lang="en">
+        <head>
+          <title>{String(metadata.title) ?? ""}</title>
+          <meta
+            name="description"
+            content={metadata.description ?? undefined}
+          />
+        </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
