@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Link from "next/link";
-import { Share, Trash, Download } from "lucide-react";
+import { Share, Trash } from "lucide-react";
 import { useState } from "react";
 
 interface Document {
@@ -47,23 +47,6 @@ export default function DocumentsPage({
     }
   };
 
-  const handleDownloadAll = () => {
-    if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
-      const documentUrls = familyMember.documents.map(
-        (doc) => `https://drive.google.com/uc?id=${doc.googleDriveFileId}`
-      );
-
-      navigator.serviceWorker.controller.postMessage({
-        type: "CACHE_ALL",
-        files: documentUrls,
-      });
-
-      alert("All documents are being downloaded for offline use!");
-    } else {
-      alert("Service Worker not registered. Please reload the page.");
-    }
-  };
-
   return (
     <div className="p-4">
       <Card className="max-w-md mx-auto">
@@ -81,14 +64,6 @@ export default function DocumentsPage({
             <p className="text-center text-gray-500">No documents found.</p>
           ) : (
             <>
-              <Button
-                className="w-full flex items-center gap-2"
-                onClick={handleDownloadAll}
-              >
-                <Download size={16} />
-                Download All for Offline
-              </Button>
-
               <ul className="space-y-2">
                 {familyMember.documents.map((doc) => (
                   <Dialog key={doc.id}>
